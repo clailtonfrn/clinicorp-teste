@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-clinicorp
+  namespace: devops-challenge
+  labels:
+    app: api-clinicorp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-clinicorp
+  template:
+    metadata:
+      labels:
+        app: api-clinicorp
+    spec:
+      containers:
+      - name: hello-world-container
+        image: clailtonfrn/api-clinicorp:TAG
+        ports:
+        - containerPort: 8000
