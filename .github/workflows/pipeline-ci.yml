@@ -7,7 +7,7 @@ on:
 
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   build-and-publish-docker:
@@ -39,3 +39,34 @@ jobs:
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/api-clinicorp:${{ env.TAG }}
+
+  deploy-to-kubernetes:
+    needs: build-and-publish-docker
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Extract Git Tag
+      id: extract_tag
+      run: |
+        TAG=$(git describe --tags --abbrev=0 | sed 's/^v//')
+        echo "TAG=$TAG" >> $GITHUB_ENV
+
+    - name: Edit deploymento with Tag
+      run: |
+        sed "s/TAG/${{ env.TAG }}/" deploy/deployment.yml > application.yml
+
+    - name: Authenticate with Kubernetes Cluster and Deploy
+      run: |
+        echo "${{ secrets.KUBECONFIG }}" > kubeconfig
+        export KUBECONFIG=kubeconfig
+        kubectl apply -f application.yml --validate=false ; kubectl apply -f deploy/svc.yml
