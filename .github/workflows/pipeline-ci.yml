@@ -69,4 +69,4 @@ jobs:
       run: |
         echo "${{ secrets.KUBECONFIG }}" > kubeconfig
         export KUBECONFIG=kubeconfig
-        kubectl apply -f application.yml --validate=false ; kubectl apply -f deploy/svc.yml
+        kubectl apply -f application.yml --validate=false ; kubectl apply -f deploy/service.yml
